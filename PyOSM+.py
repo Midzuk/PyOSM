@@ -11,10 +11,10 @@ def main():
   result = api.query(qry)
   ways = result.ways
 
-  nodeFile = open('%s%soutput_nodes.csv' % (path, region), 'w')
+  nodeFile = open('temporary/temp_nodes.csv', 'w')
   nodeFile.write('nodeId,x,y,layer\n')
 
-  linkFile = open('%s%soutput_links.csv' % (path, region), 'w')
+  linkFile = open('temporary/temp_links.csv', 'w')
   linkFile.write('nodeIdOrg,nodeIdDest,distance,highway,oneway,bridge,tunnel\n')
 
   for way in ways:
