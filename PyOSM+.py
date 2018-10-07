@@ -2,6 +2,7 @@ import overpy
 import geopy.distance
 
 def main():
+
   api = overpy.Overpass()
 
   qry = 'node(50.745, 7.17, 50.75, 7.2);\
@@ -12,23 +13,38 @@ def main():
   result = api.query(qry)
   ways = result.ways
 
-  with open('temporary/temp_nodes.csv', 'w') as nodeFile, open('temporary/temp_links.csv', 'w') as linkFile:
-    nodeFile.write('nodeId,x,y,layer\n')
-    linkFile.write('nodeIdOrg,nodeIdDest,distance,highway,oneway,bridge,tunnel\n')
+  with open('temporary/temp_nodes.csv', 'w') as node_file, open('temporary/temp_links.csv', 'w') as link_file:
+    node_file.write('node_id,lat,lon\n')
+    link_file.write('node_id_org,node_id_dest,distance,highway,oneway,bridge,tunnel\n')
 
     for way in ways:
-      linkInfo = {}
-      linkInfo['highway'] = way.tags.get('highway')
-      linkInfo['oneway'] = way.tags.get('oneway')
-      linkInfo['bridge'] = way.tags.get('bridge')
-      linkInfo['tunnel'] = way.tags.get('tunnel')
+      highway = way.tags.get('highway')
+      oneway = way.tags.get('oneway')
+      bridge = way.tags.get('bridge')
+      tunnel = way.tags.get('tunnel')
 
-      print(linkInfo['highway'])
+      nodes = way.nodes
+      node_dict = {}
+
+      for node in nodes:
+        node_dict[node.id] = (node.lat, node.lon)
+      
+      for node_id, (lat, lon) in node_dict.items():
+        node_file.write('%d,%f,%f\n' % (node_id, lat, lon))
+
+      for node1, node2 in zip(nodes, nodes[1:]):
+        coord1 = (node1.lat, node1.lon)
+        coord2 = (node2.lat, node2.lon)
+        dist = geopy.distance.vincenty(coord1, coord2).m
+
+        link_file.write('%d,%d,%f,%s,%s,%s,%s\n' % (
+          node1.id, node2.id, dist, highway, oneway, bridge, tunnel))
+
 
 if __name__ == '__main__':
   main()
   
-      '''
+'''
       coords_1 = (52.2296756, 21.0122287)
       coords_2 = (52.406374, 16.9251681)
       geopy.distance.vincenty(coords_1, coords_2).m
