@@ -1,14 +1,23 @@
 import overpy
 import geopy.distance
 
-def main():
+def make_csv(lat_org, lon_org, lat_dest, lon_dest):
+  # 選択範囲の決定
+  # 基準地域メッシュ (3次メッシュ) に従い, 周囲約1kmを選択 (緯度 30秒, 経度 45秒)
+  lat_min = min([lat_org, lat_dest]) - 30 / 3600
+  lat_max = max([lat_org, lat_dest]) + 30 / 3600
 
+  lon_min = min([lon_org, lon_dest]) - 45 / 3600
+  lon_max = max([lon_org, lon_dest]) + 45 / 3600
+
+  # Overpass
   api = overpy.Overpass()
 
-  qry = 'node(35.635, 139.918, 35.647, 139.930);\
-         way(bn)["highway"];\
-         (._; >;);\
-         out;'
+  qry = 'node(%f, %f, %f, %f); \
+         way(bn)["highway"]; \
+         (._; >;); \
+         out;' \
+         % (lat_min, lon_min, lat_max, lon_max)
 
   result = api.query(qry)
   ways = result.ways
@@ -16,13 +25,23 @@ def main():
   with open('temporary/temp_nodes.csv', 'w') as node_file, open('temporary/temp_links.csv', 'w') as link_file:
     
     node_file.write('node_id,lat,lon,traffic_signal\n')
-    link_file.write('node_id_org,node_id_dest,distance,highway,oneway,bridge,tunnel\n')
+    link_file.write('node_id_org,node_id_dest,distance,highway,oneway\n')
+    #link_file.write('node_id_org,node_id_dest,distance,highway,oneway,bridge,tunnel\n')
 
     for way in ways:
-      highway = way.tags.get('highway')
-      oneway = way.tags.get('oneway')
-      bridge = way.tags.get('bridge')
-      tunnel = way.tags.get('tunnel')
+      highway = way.tags.get('highway') or ''
+      oneway = way.tags.get('oneway') or ''
+      #max_speed = way.tags.get('max_speed')
+      #lanes = way.tags.get('lanes')
+      #width = way.tags.get('width')
+
+      #bridge = way.tags.get('bridge')
+      #tunnel = way.tags.get('tunnel')
+
+      #surface = way.tags.get('surface')
+      #service = way.tags.get('service')
+      #foot = way.tags.get('foot')
+      #bicycle = way.tags.get('bicycle')
 
       nodes = way.nodes
       node_dict = {}
@@ -43,12 +62,16 @@ def main():
         coord2 = (node2.lat, node2.lon)
         dist = geopy.distance.vincenty(coord1, coord2).m
 
-        link_file.write('%d,%d,%f,%s,%s,%s,%s\n' % (
-          node1.id, node2.id, dist, highway, oneway, bridge, tunnel))
+        link_file.write('%d,%d,%f,%s,%s\n' % (
+          node1.id, node2.id, dist, highway, oneway))
 
 
 if __name__ == '__main__':
-  main()
+  # 緯度・経度を入力
+  lat_org, lon_org = map(float, input('出発地の緯度・経度').replace(' ', '').split(','))
+  lat_dest, lon_dest = map(float, input('到着地の緯度・経度').replace(' ', '').split(','))
+
+  make_csv(lat_org, lon_org, lat_dest, lon_dest)
   
 '''
 qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
