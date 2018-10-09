@@ -14,10 +14,25 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
   # Overpass
   api = overpy.Overpass()
 
-  qry = 'node(%f, %f, %f, %f); \
-         way(bn)["highway"]; \
-         (._; >;); \
-         out;' % (lat_min, lon_min, lat_max, lon_max)
+  qry = 'way(%f, %f, %f, %f) -> .w; \
+         ( \
+           way.w["highway" ~ "motorway"]; \
+           way.w["highway" ~ "trunk"]; \
+           way.w["highway" ~ "primary"]; \
+           way.w["highway" ~ "secondary"]; \
+           way.w["highway" ~ "tertiary"]; \
+           way.w["highway" ~ "unclassified"]; \
+           way.w["highway" ~ "footway"]; \
+          ) -> ._; \
+          (._; >;); \
+          out;' % (lat_min, lon_min, lat_max, lon_max)
+
+  '''
+    qry = 'node(%f, %f, %f, %f); \
+          way(bn)["highway"]; \
+          (._; >;); \
+          out;' % (lat_min, lon_min, lat_max, lon_max)
+  '''
 
   result = api.query(qry)
   ways = result.ways
