@@ -16,7 +16,6 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
 
   qry = 'way(%f, %f, %f, %f) -> .w; \
          ( \
-           way.w["highway" ~ "motorway"]; \
            way.w["highway" ~ "trunk"]; \
            way.w["highway" ~ "primary"]; \
            way.w["highway" ~ "secondary"]; \
@@ -26,6 +25,8 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
           ) -> ._; \
           (._; >;); \
           out;' % (lat_min, lon_min, lat_max, lon_max)
+
+  # way.w["highway" ~ "motorway"]; \
 
   '''
     qry = 'node(%f, %f, %f, %f); \
