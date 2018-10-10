@@ -39,8 +39,8 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
 
   with open('temporary/temp_nodes.csv', 'w') as node_file, open('temporary/temp_links.csv', 'w') as link_file:
     
-    node_file.write('node_id,lat,lon,traffic_signal\n')
-    link_file.write('node_id_org,node_id_dest,distance,highway,oneway\n')
+    node_file.write('node_id,lat,lon,signal\n')
+    link_file.write('node_id_org,node_id_dest,distance,highway,oneway,max_speed,lanes,width,bridge,tunnel,surface,service,foot,bicycle\n')
     #link_file.write('node_id_org,node_id_dest,distance,highway,oneway,max_speed,lanes,width,bridge,tunnel,surface,service,foot,bicycle\n')
 
     for way in ways:
