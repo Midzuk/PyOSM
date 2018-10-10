@@ -1,15 +1,16 @@
 import overpy
 import geopy.distance
 import subprocess
+import csv
 
 def make_csv(lat_org, lon_org, lat_dest, lon_dest):
   # 選択範囲の決定
-  # 周囲約500mを選択 (緯度 15秒, 経度 22.5秒)
-  lat_min = min([lat_org, lat_dest]) - 15 / 3600
-  lat_max = max([lat_org, lat_dest]) + 15 / 3600
+  # 周囲約250mを選択 (緯度 7.5秒, 経度 11.25秒)
+  lat_min = min([lat_org, lat_dest]) - 7.5 / 3600
+  lat_max = max([lat_org, lat_dest]) + 7.5 / 3600
 
-  lon_min = min([lon_org, lon_dest]) - 22.5 / 3600
-  lon_max = max([lon_org, lon_dest]) + 22.5 / 3600
+  lon_min = min([lon_org, lon_dest]) - 11.25 / 3600
+  lon_max = max([lon_org, lon_dest]) + 11.25 / 3600
 
   # Overpass
   api = overpy.Overpass()
@@ -42,7 +43,6 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
     
     node_file.write('node_id,lat,lon,signal\n')
     link_file.write('node_id_org,node_id_dest,distance,highway,oneway,max_speed,lanes,width,bridge,tunnel,surface,service,foot,bicycle\n')
-    #link_file.write('node_id_org,node_id_dest,distance,highway,oneway,max_speed,lanes,width,bridge,tunnel,surface,service,foot,bicycle\n')
 
     for way in ways:
       highway = way.tags.get('highway') or ''
@@ -80,6 +80,8 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
 
         link_file.write('%d,%d,%f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
           node1.id, node2.id, dist, highway, oneway, max_speed, lanes, width, bridge, tunnel, surface, service, foot, bicycle))
+  
+  print('make_csv')
 
 def simplify_road_network():
   cmd = 'SimplifyRoadNetwork-exe.exe'
@@ -88,18 +90,36 @@ def simplify_road_network():
 
 def shortest_path(lat_org, lon_org, lat_dest, lon_dest):
   cmd = 'Geography-exe.exe %f %f %f %f' % (lat_org, lon_org, lat_dest, lon_dest)
-  a = subprocess.getoutput(cmd).replace(' ', '').split(',')
-  print(a)
+  dist = subprocess.getoutput(cmd).replace(' ', '').split(',')
+  print('shortest_path')
+  return dist
 
 if __name__ == '__main__':
   # 緯度・経度を入力
   lat_org, lon_org = map(float, input('出発地の緯度・経度').replace(' ', '').split(','))
   lat_dest, lon_dest = map(float, input('到着地の緯度・経度').replace(' ', '').split(','))
 
-  make_csv(lat_org, lon_org, lat_dest, lon_dest)
-  simplify_road_network()
-  shortest_path(lat_org, lon_org, lat_dest, lon_dest)
-  
+  with open('ignore/input/rawdata_lat_lon_mini.csv', 'r', encoding='UTF-8') as fi, open('ignore/output/rawdata_distance.csv', 'w', encoding='UTF-8') as fo:
+    fo.write('sample_id,dist_org,dist_link,dist_dest\n')
+
+    make_csv(lat_org, lon_org, lat_dest, lon_dest)
+    simplify_road_network()
+    dist = shortest_path(lat_org, lon_org, lat_dest, lon_dest)
+
+    print(dist)
+    
+    '''
+    reader = csv.reader(fi)
+    header = next(reader)
+
+    for row in reader:
+      sample_id = row[0]
+      lat_org, lon_org, lat_dest, lon_dest = map(float, row[1:])
+      make_csv(lat_org, lon_org, lat_dest, lon_dest)
+      simplify_road_network()
+      dist = shortest_path(lat_org, lon_org, lat_dest, lon_dest)
+      fo.write('%s,%s\n' % (sample_id, dist))
+    '''
 '''
 qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
             way(bn)["highway"];\
