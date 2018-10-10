@@ -41,22 +41,22 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
     
     node_file.write('node_id,lat,lon,traffic_signal\n')
     link_file.write('node_id_org,node_id_dest,distance,highway,oneway\n')
-    #link_file.write('node_id_org,node_id_dest,distance,highway,oneway,bridge,tunnel\n')
+    #link_file.write('node_id_org,node_id_dest,distance,highway,oneway,max_speed,lanes,width,bridge,tunnel,surface,service,foot,bicycle\n')
 
     for way in ways:
       highway = way.tags.get('highway') or ''
       oneway = way.tags.get('oneway') or ''
-      #max_speed = way.tags.get('max_speed')
-      #lanes = way.tags.get('lanes')
-      #width = way.tags.get('width')
+      max_speed = way.tags.get('max_speed') or ''
+      lanes = way.tags.get('lanes') or ''
+      width = way.tags.get('width') or ''
 
-      #bridge = way.tags.get('bridge')
-      #tunnel = way.tags.get('tunnel')
+      bridge = way.tags.get('bridge') or ''
+      tunnel = way.tags.get('tunnel') or ''
 
-      #surface = way.tags.get('surface')
-      #service = way.tags.get('service')
-      #foot = way.tags.get('foot')
-      #bicycle = way.tags.get('bicycle')
+      surface = way.tags.get('surface') or ''
+      service = way.tags.get('service') or ''
+      foot = way.tags.get('foot') or ''
+      bicycle = way.tags.get('bicycle') or ''
 
       nodes = way.nodes
       node_dict = {}
@@ -77,8 +77,8 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
         coord2 = (node2.lat, node2.lon)
         dist = geopy.distance.vincenty(coord1, coord2).m
 
-        link_file.write('%d,%d,%f,%s,%s\n' % (
-          node1.id, node2.id, dist, highway, oneway))
+        link_file.write('%d,%d,%f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+          node1.id, node2.id, dist, highway, oneway, max_speed, lanes, width, bridge, tunnel, surface, service, foot, bicycle))
 
 def simplify_road_network():
   cmd = 'SimplifyRoadNetwork-exe.exe'
