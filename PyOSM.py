@@ -15,8 +15,13 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
   # Overpass
   api = overpy.Overpass()
 
-  qry = 'way(%f, %f, %f, %f) -> .w; \
-         ( \
+  qry = 'way(%f, %f, %f, %f); \
+          (._; >;); \
+          out;' % (lat_min, lon_min, lat_max, lon_max)
+
+  # way.w["highway" ~ "motorway"]; \
+  '''
+           ( \
            way.w["highway" ~ "trunk"]; \
            way.w["highway" ~ "primary"]; \
            way.w["highway" ~ "secondary"]; \
@@ -25,10 +30,7 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
            way.w["highway" ~ "residential"]; \
            way.w["highway" ~ "footway"]; \
           ) -> ._; \
-          (._; >;); \
-          out;' % (lat_min, lon_min, lat_max, lon_max)
-
-  # way.w["highway" ~ "motorway"]; \
+  '''
 
   '''
     qry = 'node(%f, %f, %f, %f); \
@@ -106,8 +108,8 @@ def main2():
   print(dist)
 
 def main1():
-  with open('ignore/input/rawdata_lat_lon_mini.csv', 'r', encoding='UTF-8') as fi, open('ignore/output/rawdata_distance.csv', 'w', encoding='UTF-8') as fo:
-    fo.write('sample_id,dist_org,dist_link,dist_dest\n')
+  with open('ignore/input/rawdata_lat_lon.csv', 'r', encoding='UTF-8') as fi, open('ignore/output/rawdata_distance.csv', 'w', encoding='UTF-8') as fo:
+    fo.write('sample_id,dist_link,dist_org,dist_dest\n')
 
     # make_csv(lat_org, lon_org, lat_dest, lon_dest)
     # simplify_road_network()
@@ -124,7 +126,11 @@ def main1():
       make_csv(lat_org, lon_org, lat_dest, lon_dest)
       simplify_road_network()
       dist = shortest_path(lat_org, lon_org, lat_dest, lon_dest)
-      fo.write('%s,%s\n' % (sample_id, dist))
+      dist1 = []
+      for d in dist:
+        dist1.append(d.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', ''))
+      dist_link, dist_org, dist_dest = map(float, dist1) # map(float, dist.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', '').split(','))
+      fo.write('%s,%f,%f,%f\n' % (sample_id, dist_link, dist_org, dist_dest))
     
 '''
 qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
@@ -134,4 +140,4 @@ qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
 '''
 
 if __name__ == '__main__':
-  main2()
+  main1()
