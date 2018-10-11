@@ -22,6 +22,7 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
            way.w["highway" ~ "secondary"]; \
            way.w["highway" ~ "tertiary"]; \
            way.w["highway" ~ "unclassified"]; \
+           way.w["highway" ~ "residential"]; \
            way.w["highway" ~ "footway"]; \
           ) -> ._; \
           (._; >;); \
@@ -94,11 +95,17 @@ def shortest_path(lat_org, lon_org, lat_dest, lon_dest):
   print('shortest_path')
   return dist
 
-if __name__ == '__main__':
-  # 緯度・経度を入力
-  # lat_org, lon_org = map(float, input('出発地の緯度・経度').replace(' ', '').split(','))
-  # lat_dest, lon_dest = map(float, input('到着地の緯度・経度').replace(' ', '').split(','))
+def main2():
+  lat_org, lon_org = map(float, input('出発地の緯度・経度').replace(' ', '').split(','))
+  lat_dest, lon_dest = map(float, input('到着地の緯度・経度').replace(' ', '').split(','))
 
+  make_csv(lat_org, lon_org, lat_dest, lon_dest)
+  simplify_road_network()
+  dist = shortest_path(lat_org, lon_org, lat_dest, lon_dest)
+
+  print(dist)
+
+def main1():
   with open('ignore/input/rawdata_lat_lon_mini.csv', 'r', encoding='UTF-8') as fi, open('ignore/output/rawdata_distance.csv', 'w', encoding='UTF-8') as fo:
     fo.write('sample_id,dist_org,dist_link,dist_dest\n')
 
@@ -125,3 +132,6 @@ qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
             node(w);\
             out;'
 '''
+
+if __name__ == '__main__':
+  main2()
