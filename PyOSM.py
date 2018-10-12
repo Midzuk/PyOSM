@@ -2,6 +2,7 @@ import overpy
 import geopy.distance
 import subprocess
 import csv
+from time import sleep
 
 def make_csv(lat_org, lon_org, lat_dest, lon_dest):
   # 選択範囲の決定
@@ -15,22 +16,22 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
   # Overpass
   api = overpy.Overpass()
 
-  qry = 'way(%f, %f, %f, %f); \
-          (._; >;); \
-          out;' % (lat_min, lon_min, lat_max, lon_max)
-
-  # way.w["highway" ~ "motorway"]; \
-  '''
-           ( \
+  qry = 'way(%f, %f, %f, %f)-> .w; \
+          ( \
            way.w["highway" ~ "trunk"]; \
            way.w["highway" ~ "primary"]; \
            way.w["highway" ~ "secondary"]; \
            way.w["highway" ~ "tertiary"]; \
            way.w["highway" ~ "unclassified"]; \
            way.w["highway" ~ "residential"]; \
+           way.w["highway" ~ "service"]; \
            way.w["highway" ~ "footway"]; \
+           way.w["highway" ~ "pedestrian"]; \
           ) -> ._; \
-  '''
+          (._; >;); \
+          out;' % (lat_min, lon_min, lat_max, lon_max)
+
+  # way.w["highway" ~ "motorway"]; \
 
   '''
     qry = 'node(%f, %f, %f, %f); \
@@ -123,14 +124,18 @@ def main1():
     for row in reader:
       sample_id = row[0]
       lat_org, lon_org, lat_dest, lon_dest = map(float, row[1:])
-      make_csv(lat_org, lon_org, lat_dest, lon_dest)
-      simplify_road_network()
-      dist = shortest_path(lat_org, lon_org, lat_dest, lon_dest)
-      dist1 = []
-      for d in dist:
-        dist1.append(d.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', ''))
-      dist_link, dist_org, dist_dest = map(float, dist1) # map(float, dist.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', '').split(','))
-      fo.write('%s,%f,%f,%f\n' % (sample_id, dist_link, dist_org, dist_dest))
+      try:
+        make_csv(lat_org, lon_org, lat_dest, lon_dest)
+        simplify_road_network()
+        dist = shortest_path(lat_org, lon_org, lat_dest, lon_dest)
+        dist1 = []
+        for d in dist:
+          dist1.append(d.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', ''))
+        dist_link, dist_org, dist_dest = map(float, dist1) # map(float, dist.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', '').split(','))
+        fo.write('%s,%f,%f,%f\n' % (sample_id, dist_link, dist_org, dist_dest))
+        sleep(10)
+      except:
+        pass
     
 '''
 qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
