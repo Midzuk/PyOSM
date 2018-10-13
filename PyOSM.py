@@ -45,7 +45,7 @@ def make_csv(lat_org, lon_org, lat_dest, lon_dest):
 
   with open('temporary/temp_nodes.csv', 'w') as node_file, open('temporary/temp_links.csv', 'w') as link_file:
     
-    node_file.write('node_id,lat,lon,signal\n')
+    node_file.write('node_id,latitude,longitude,signal\n')
     link_file.write('node_id_org,node_id_dest,distance,highway,oneway,max_speed,lanes,width,bridge,tunnel,surface,service,foot,bicycle\n')
 
     for way in ways:
@@ -133,7 +133,7 @@ def main1():
           dist1.append(d.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', ''))
         dist_link, dist_org, dist_dest = map(float, dist1) # map(float, dist.replace('"', '').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace(' ', '').split(','))
         fo.write('%s,%f,%f,%f\n' % (sample_id, dist_link, dist_org, dist_dest))
-        sleep(10)
+        sleep(1)
       except:
         pass
     
@@ -145,4 +145,4 @@ qryNode = 'node(50.745, 7.17, 50.75, 7.2);\
 '''
 
 if __name__ == '__main__':
-  main2()
+  main1()
