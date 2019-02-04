@@ -17,10 +17,6 @@ def make_csv(lat_min, lon_min, lat_max, lon_max):
             way.w["highway" ~ "tertiary"]; \
             way.w["highway" ~ "unclassified"]; \
             way.w["highway" ~ "motorway"]; \
-            way.w["highway" ~ "residential"]; \
-            way.w["highway" ~ "service"]; \
-            way.w["highway" ~ "footway"]; \
-            way.w["highway" ~ "pedestrian"]; \
             ) -> ._; \
             (._; >;); \
             out;' % (lat_min, lon_min, lat_max, lon_max)
@@ -85,8 +81,15 @@ def make_csv(lat_min, lon_min, lat_max, lon_max):
     
     print('make_csv')
 
+def simplify_road_network():
+    cmd = 'SimplifyRoadNetwork-exe.exe'
+    subprocess.run(cmd)
+    print("simplify_road_network")
+
+
 def main():
     make_csv(36.11770833, 139.0578125, 36.27395833, 139.2484375)
+    simplify_road_network()
 
 if __name__ == '__main__':
     main()
