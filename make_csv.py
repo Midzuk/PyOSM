@@ -16,7 +16,6 @@ def make_csv(lat_min, lon_min, lat_max, lon_max):
             way.w["highway" ~ "secondary"]; \
             way.w["highway" ~ "tertiary"]; \
             way.w["highway" ~ "unclassified"]; \
-            way.w["highway" ~ "motorway"]; \
             ) -> ._; \
             (._; >;); \
             out;' % (lat_min, lon_min, lat_max, lon_max)
